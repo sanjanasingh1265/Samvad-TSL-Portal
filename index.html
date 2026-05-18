@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SAMVAD AI — Grievance Portal | Tata Steel Meramandali</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+    background: #0A1628;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── TRICOLOR TOP ── */
+  .tricolor {
+    width: 100%;
+    height: 7px;
+    background: linear-gradient(to right, #E65100 33.3%, #FFFFFF 33.3%, #FFFFFF 66.6%, #1B5E20 66.6%);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    width: 100%;
+    background: linear-gradient(160deg, #003087 0%, #001B52 60%, #0A1628 100%);
+    padding: 28px 20px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(200,146,42,0.08);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .samvad-title {
+    font-size: 38px;
+    font-weight: 900;
+    color: #C8922A;
+    letter-spacing: 6px;
+    line-height: 1;
+    margin-bottom: 4px;
+    position: relative; z-index:1;
+  }
+  .samvad-devanagari {
+    font-size: 20px;
+    color: rgba(200,146,42,0.7);
+    margin-bottom: 10px;
+    position: relative; z-index:1;
+  }
+  .hero-sub {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+    position: relative; z-index:1;
+  }
+  .hero-org {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    position: relative; z-index:1;
+  }
+
+  /* ── INSTRUCTION STRIP ── */
+  .instruction {
+    background: rgba(200,146,42,0.15);
+    border: 1px solid rgba(200,146,42,0.3);
+    border-radius: 8px;
+    margin: 16px 16px 0;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .instruction p {
+    font-size: 12px;
+    color: #C8922A;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    width: 100%;
+    max-width: 480px;
+    padding: 16px;
+    flex: 1;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    text-align: center;
+    margin: 16px 0 12px;
+    text-transform: uppercase;
+  }
+
+  /* ── FORM CARDS ── */
+  .form-card {
+    border-radius: 16px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+  .form-card:active {
+    transform: scale(0.97);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  .card-header {
+    padding: 16px 18px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .card-titles { flex: 1; }
+  .card-title-en {
+    font-size: 17px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.1;
+    letter-spacing: 0.3px;
+  }
+  .card-title-hi {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    margin-top: 2px;
+  }
+  .card-title-or {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 1px;
+  }
+  .card-arrow {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .card-body {
+    padding: 0 18px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+  }
+
+  .card-footer {
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .card-footer-text {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+  .open-btn {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Card 1 — Amenities */
+  .card-amenities {
+    background: linear-gradient(135deg, #BF360C 0%, #E65100 50%, #FF6D00 100%);
+  }
+  /* Card 2 — Employment */
+  .card-employment {
+    background: linear-gradient(135deg, #1A237E 0%, #1565C0 50%, #1976D2 100%);
+  }
+  /* Card 3 — Safety */
+  .card-safety {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
+  }
+
+  /* ── PRIVACY NOTICE ── */
+  .privacy {
+    margin: 4px 0 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .privacy-icon { font-size: 18px; flex-shrink:0; margin-top:1px; }
+  .privacy-text { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+  .privacy-text strong { color: rgba(255,255,255,0.75); }
+
+  /* ── HOW TO USE ── */
+  .how-to {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .how-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .steps {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .step {
+    flex: 1;
+    text-align: center;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    background: rgba(200,146,42,0.2);
+    border: 1px solid rgba(200,146,42,0.4);
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+    color: #C8922A;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 5px;
+  }
+  .step-text {
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.4;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    width: 100%;
+    padding: 14px 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: auto;
+  }
+  .footer p {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.8;
+  }
+  .footer .version {
+    display: inline-block;
+    background: rgba(200,146,42,0.15);
+    border: 1px solid rgba(200,146,42,0.25);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 9px;
+    color: rgba(200,146,42,0.7);
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tricolor"></div>
+
+<div class="hero">
+  <div class="samvad-title">SAMVAD</div>
+  <div class="samvad-devanagari">संवाद AI</div>
+  <div class="hero-sub">Grievance &amp; Feedback Portal</div>
+  <div class="hero-org">Tata Steel Limited &nbsp;·&nbsp; Meramandali Plant, Odisha</div>
+</div>
+
+<div style="width:100%;max-width:480px;padding:0 16px;">
+  <div class="instruction">
+    <p>
+      Select the category that matches your concern<br>
+      अपनी समस्या की श्रेणी चुनें &nbsp;·&nbsp; ଆପଣଙ୍କ ସମସ୍ୟା ବିଭାଗ ବଛନ୍ତୁ
+    </p>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- HOW TO USE -->
+  <div class="how-to">
+    <div class="how-title">How to Submit / कैसे जमा करें</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Choose<br>your category<br>श्रेणी चुनें</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Tap the<br>card below<br>टैप करें</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Fill the<br>form<br>फॉर्म भरें</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Submit<br>&amp; done<br>जमा करें</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Select Your Concern Category</div>
+
+  <!-- ── CARD 1: AMENITIES ── -->
+  <a class="form-card card-amenities"
+     href="https://tinyurl.com/Form-Amenities"
+     target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">🏗️</div>
+      <div class="card-titles">
+        <div class="card-title-en">AMENITIES</div>
+        <div class="card-title-hi">सुविधाएं &nbsp;·&nbsp; ସୁବିଧା</div>
+        <div class="card-title-or">Workplace Facility Concerns</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-body">
+      <span class="tag">🚻 Restroom</span>
+      <span class="tag">💧 Drinking Water</span>
+      <span class="tag">🍽️ Canteen</span>
+      <span class="tag">🪑 Seating</span>
+      <span class="tag">🏢 Infrastructure</span>
+    </div>
+    <div class="card-footer">
+      <span class="card-footer-text">tinyurl.com/Form-Amenities</span>
+      <span class="open-btn">OPEN FORM →</span>
+    </div>
+  </a>
+
+  <!-- ── CARD 2: EMPLOYMENT ── -->
+  <a class="form-card card-employment"
+     href="https://tinyurl.com/Form-Employment"
+     target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">👔</div>
+      <div class="card-titles">
+        <div class="card-title-en">EMPLOYMENT ISSUES</div>
+        <div class="card-title-hi">रोजगार समस्याएं &nbsp;·&nbsp; ନିୟୋଜନ</div>
+        <div class="card-title-or">HR, Payroll &amp; Service Matters</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-body">
+      <span class="tag">👔 Manager Issues</span>
+      <span class="tag">📅 Leave Deduction</span>
+      <span class="tag">💰 Salary</span>
+      <span class="tag">🏥 Mediclaim</span>
+      <span class="tag">🔄 Transfer</span>
+      <span class="tag">📚 Study Leave</span>
+    </div>
+    <div class="card-footer">
+      <span class="card-footer-text">tinyurl.com/Form-Employment</span>
+      <span class="open-btn">OPEN FORM →</span>
+    </div>
+  </a>
+
+  <!-- ── CARD 3: SAFETY ── -->
+  <a class="form-card card-safety"
+     href="https://tinyurl.com/Form-Safety-Related"
+     target="_blank" rel="noopener">
+    <div class="card-header">
+      <div class="card-icon">🛡️</div>
+      <div class="card-titles">
+        <div class="card-title-en">SAFETY &amp; WELL-BEING</div>
+        <div class="card-title-hi">सुरक्षा एवं कल्याण &nbsp;·&nbsp; ସୁରକ୍ଷା</div>
+        <div class="card-title-or">Safety, Hazards &amp; Women's Safety</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+    <div class="card-body">
+      <span class="tag">⚠️ Workplace Safety</span>
+      <span class="tag">🏭 Shop Floor</span>
+      <span class="tag">🚨 Emergency</span>
+      <span class="tag">👩 Women's Safety</span>
+      <span class="tag">🧠 Well-Being</span>
+    </div>
+    <div class="card-footer">
+      <span class="card-footer-text">tinyurl.com/Form-Safety-Related</span>
+      <span class="open-btn">OPEN FORM →</span>
+    </div>
+  </a>
+
+  <!-- PRIVACY NOTICE -->
+  <div class="privacy">
+    <div class="privacy-icon">🔒</div>
+    <div class="privacy-text">
+      <strong>100% Anonymous &amp; Confidential</strong><br>
+      पूर्णतः गोपनीय &nbsp;·&nbsp; ସମ୍ପୂର୍ଣ ଗୋପନୀୟ<br>
+      Your responses are seen only by authorised HR personnel.
+      No retaliation. No identification required.
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>
+    SAMVAD AI &nbsp;·&nbsp; Tata Steel Limited, Meramandali<br>
+    English &nbsp;·&nbsp; हिन्दी &nbsp;·&nbsp; ଓଡ଼ିଆ<br>
+    HR Contact: sanjanasingh1265@gmail.com
+  </p>
+  <div class="version">SAMVAD v2.0 &nbsp;·&nbsp; May 2025</div>
+</div>
+
+</body>
+</html>

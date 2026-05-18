@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>SAMVAD AI — Grievance Portal | Tata Steel Meramandali</title>
+<style>
+/* ─── RESET ─────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+/* ─── THEME TOKENS ──────────────────────────────────── */
+:root{
+  /* Background / structure */
+  --ink:       #0D1117;   /* deep navy-black (left panel PPT) */
+  --panel:     #111827;   /* card bg */
+  --cream:     #F5F0E8;   /* right panel of PPT */
+  --offwhite:  #FAFAFA;
+  --white:     #FFFFFF;
+  --border:    #2A3550;
+
+  /* Brand */
+  --gold:      #C8922A;
+  --gold2:     #F5C842;
+  --navy:      #003087;
+
+  /* Category — matching PPT exactly */
+  --cyan:      #00BCD4;   /* Amenities  - cyan dot in PPT */
+  --cyan-dk:   #00838F;   /* darker for text */
+  --cyan-bg:   #E0F7FA;   /* light bg */
+  --cyan-mid:  #006064;
+
+  --purple:    #CE93D8;   /* Employment - purple dot in PPT */
+  --purple-dk: #6A1B9A;
+  --purple-bg: #F3E5F5;
+  --purple-mid:#7B1FA2;
+
+  --maroon:    #C62828;   /* Safety     - red/maroon dot in PPT */
+  --maroon-dk: #8B0000;
+  --maroon-bg: #FFEBEE;
+  --maroon-mid:#B71C1C;
+
+  /* Text */
+  --txt-main:  #E8EAF0;
+  --txt-muted: #8899BB;
+  --txt-dim:   #4A5568;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--ink);
+  min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-x:hidden;
+  color:var(--txt-main);
+}
+
+/* ─── TRICOLOR (matches PPT: cyan left, white centre, maroon right) ── */
+.tricolor{width:100%;height:6px;display:flex;flex-shrink:0}
+.t-cyan  {flex:1;background:linear-gradient(90deg,var(--cyan),var(--cyan-dk))}
+.t-white {flex:1;background:#FFFFFF}
+.t-maroon{flex:1;background:linear-gradient(90deg,var(--maroon-mid),var(--maroon-dk))}
+
+/* ─── WRAP ──────────────────────────────────────────── */
+.wrap{width:100%;max-width:460px;flex:1;display:flex;flex-direction:column}
+
+/* ─── HERO (matches PPT left panel: dark bg, cyan SAMVAD, tricolor rule) ── */
+.hero{
+  padding:28px 22px 26px;
+  background:linear-gradient(160deg,#0D1117 0%,#111827 60%,#0A1A0A 100%);
+  position:relative;overflow:hidden;
+}
+/* Subtle glow orbs matching PPT */
+.hero::before{
+  content:'';position:absolute;top:-50px;right:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,188,212,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-40px;left:-30px;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(198,40,40,0.1) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Organisation badge */
+.org-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(0,188,212,0.35);
+  border-radius:20px;padding:4px 12px;
+  font-size:8.5px;font-weight:700;letter-spacing:2px;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:16px;
+  background:rgba(0,188,212,0.08);
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* SAMVAD wordmark — cyan gradient exactly like PPT */
+.wordmark{
+  font-size:54px;font-weight:900;letter-spacing:10px;
+  line-height:1;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--cyan) 0%,#80DEEA 50%,var(--cyan-dk) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* Tricolor rule under wordmark — cyan | white | maroon (matches PPT exactly) */
+.hero-rule{
+  display:flex;height:3px;width:100%;margin-bottom:12px;border-radius:2px;
+  overflow:hidden;
+}
+.rule-cyan  {flex:1.2;background:linear-gradient(90deg,var(--cyan),var(--cyan-dk))}
+.rule-white {flex:0.4;background:#FFFFFF}
+.rule-maroon{flex:1;background:linear-gradient(90deg,var(--maroon-mid),var(--maroon-dk))}
+
+.deva{
+  font-size:13px;letter-spacing:0.5px;margin-bottom:12px;
+  color:rgba(0,188,212,0.7);
+}
+.hero-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:3px}
+.hero-org{font-size:10px;color:var(--txt-muted);letter-spacing:0.3px}
+
+/* ─── PROMPT ────────────────────────────────────────── */
+.prompt{
+  margin:13px 14px 0;padding:10px 16px;
+  background:linear-gradient(135deg,rgba(0,188,212,0.08),rgba(198,40,40,0.06));
+  border:1px solid rgba(0,188,212,0.2);
+  border-radius:12px;text-align:center;
+}
+.prompt p{font-size:11.5px;font-weight:600;color:var(--cyan);line-height:1.7}
+.prompt small{font-size:10px;font-weight:400;color:rgba(255,255,255,.3)}
+
+/* ─── CONTENT ───────────────────────────────────────── */
+.content{padding:14px;flex:1}
+
+/* ─── STEPS ─────────────────────────────────────────── */
+.steps{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;padding:14px 12px;margin-bottom:16px;
+}
+.steps-head{
+  font-size:8.5px;font-weight:800;letter-spacing:2.5px;
+  color:rgba(255,255,255,.28);text-transform:uppercase;
+  text-align:center;margin-bottom:12px;
+}
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.step{text-align:center}
+.step-num{
+  width:30px;height:30px;border-radius:50%;margin:0 auto 5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:var(--cyan);
+  background:rgba(0,188,212,0.1);
+  border:1.5px solid rgba(0,188,212,0.3);
+}
+.step-text{font-size:8.5px;color:rgba(255,255,255,.3);line-height:1.4}
+
+/* ─── DIVIDER ───────────────────────────────────────── */
+.divider{display:flex;align-items:center;gap:8px;margin:2px 0 13px}
+.div-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
+.div-text{
+  font-size:8px;font-weight:700;letter-spacing:2px;
+  color:rgba(255,255,255,.2);text-transform:uppercase;white-space:nowrap;
+}
+
+/* ─── FORM CARDS ─────────────────────────────────────── */
+.form-card{
+  display:block;text-decoration:none;
+  border-radius:16px;margin-bottom:11px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(0,0,0,.4);
+  transition:transform .18s cubic-bezier(.2,.8,.3,1),box-shadow .18s ease;
+}
+.form-card:active{transform:scale(0.974);box-shadow:0 3px 12px rgba(0,0,0,.3)}
+
+/* Card inner bg — slightly lighter dark */
+.card-inner{background:var(--panel);overflow:hidden}
+
+/* ── TOP ACCENT STRIPE + HEADER ── */
+.card-stripe{height:4px;width:100%}
+.stripe-cyan  {background:linear-gradient(90deg,var(--cyan),var(--cyan-dk))}
+.stripe-purple{background:linear-gradient(90deg,var(--purple),var(--purple-dk))}
+.stripe-maroon{background:linear-gradient(90deg,var(--maroon),var(--maroon-dk))}
+
+.card-header{
+  padding:14px 16px 12px;
+  display:flex;align-items:center;gap:12px;
+}
+.card-icon-wrap{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.icon-cyan  {background:rgba(0,188,212,0.15);border:1px solid rgba(0,188,212,0.25)}
+.icon-purple{background:rgba(206,147,216,0.15);border:1px solid rgba(206,147,216,0.25)}
+.icon-maroon{background:rgba(198,40,40,0.15);border:1px solid rgba(198,40,40,0.25)}
+
+.card-titles{flex:1;min-width:0}
+.card-en{
+  font-size:16px;font-weight:900;letter-spacing:0.5px;line-height:1.1;
+}
+.text-cyan  {color:var(--cyan)}
+.text-purple{color:var(--purple)}
+.text-maroon{color:var(--maroon)}
+
+.card-lang{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.6);margin-top:3px}
+.card-desc{font-size:9.5px;color:var(--txt-muted);margin-top:2px}
+
+.card-arrow{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#fff;
+}
+.arr-cyan  {background:var(--cyan-dk)}
+.arr-purple{background:var(--purple-dk)}
+.arr-maroon{background:var(--maroon-dk)}
+
+/* Tags */
+.card-tags{
+  display:flex;flex-wrap:wrap;gap:5px;
+  padding:0 16px 12px;
+}
+.tag{
+  padding:3px 9px;border-radius:20px;font-size:9.5px;font-weight:600;
+  white-space:nowrap;
+}
+.tag-cyan  {background:rgba(0,188,212,0.12);color:var(--cyan);
+             border:1px solid rgba(0,188,212,0.25)}
+.tag-purple{background:rgba(206,147,216,0.12);color:var(--purple);
+             border:1px solid rgba(206,147,216,0.25)}
+.tag-maroon{background:rgba(198,40,40,0.12);color:var(--maroon);
+             border:1px solid rgba(198,40,40,0.25)}
+
+/* Card footer */
+.card-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 16px 11px;
+  border-top:1px solid rgba(255,255,255,0.07);
+}
+.card-url{font-size:9px;color:rgba(255,255,255,.35)}
+.open-btn{
+  font-size:9.5px;font-weight:800;padding:5px 13px;border-radius:20px;
+  color:#fff;letter-spacing:0.5px;
+}
+.btn-cyan  {background:var(--cyan-dk)}
+.btn-purple{background:var(--purple-dk)}
+.btn-maroon{background:var(--maroon-dk)}
+
+/* ─── PRIVACY ────────────────────────────────────────── */
+.privacy{
+  display:flex;gap:11px;align-items:flex-start;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;padding:13px;margin-top:4px;
+}
+.priv-icon{font-size:19px;flex-shrink:0;margin-top:1px}
+.priv-text{font-size:10px;color:rgba(255,255,255,.38);line-height:1.7}
+.priv-text b{color:rgba(255,255,255,.65);display:block;margin-bottom:2px;font-size:10.5px}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+.footer{
+  padding:14px 20px 22px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.footer p{font-size:9px;color:rgba(255,255,255,.2);line-height:2}
+.footer-badge{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+  background:rgba(0,188,212,0.08);border:1px solid rgba(0,188,212,0.2);
+  border-radius:20px;padding:4px 14px;
+  font-size:8px;font-weight:700;letter-spacing:1px;color:rgba(0,188,212,.65);
+}
+
+/* ─── ANIMATIONS ─────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.hero            {animation:fadeUp .45s ease both}
+.prompt          {animation:fadeUp .45s .07s ease both}
+.steps           {animation:fadeUp .45s .13s ease both}
+.card-amenities  {animation:fadeUp .45s .19s ease both}
+.card-employment {animation:fadeUp .45s .26s ease both}
+.card-safety     {animation:fadeUp .45s .33s ease both}
+.privacy         {animation:fadeUp .45s .39s ease both}
+
+@media(min-width:500px){
+  .wrap{
+    border-left:1px solid rgba(255,255,255,.04);
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TRICOLOR: cyan | white | maroon (matches PPT) -->
+<div class="tricolor">
+  <div class="t-cyan"></div>
+  <div class="t-white"></div>
+  <div class="t-maroon"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── HERO ─────────────────────────────────────────── -->
+  <div class="hero">
+    <div class="org-badge">
+      <div class="badge-dot"></div>
+      Tata Steel &nbsp;·&nbsp; Meramandali, Odisha
+    </div>
+
+    <!-- Cyan gradient wordmark exactly like PPT -->
+    <div class="wordmark">SAMVAD</div>
+
+    <!-- Tricolor rule (cyan | white | maroon) -->
+    <div class="hero-rule">
+      <div class="rule-cyan"></div>
+      <div class="rule-white"></div>
+      <div class="rule-maroon"></div>
+    </div>
+
+    <div class="deva">संवाद AI &nbsp;·&nbsp; ସଂଭାଦ AI</div>
+    <div class="hero-title">Grievance &amp; Feedback Portal</div>
+    <div class="hero-org">Employee Voice System &nbsp;·&nbsp; English · हिन्दी · ଓଡ଼ିଆ</div>
+  </div>
+
+  <!-- ── PROMPT ─────────────────────────────────────────── -->
+  <div class="prompt">
+    <p>Select the category matching your concern</p>
+    <small>अपनी समस्या की श्रेणी चुनें &nbsp;·&nbsp; ଆପଣଙ୍କ ସମସ୍ୟା ବିଭାଗ ବଛନ୍ତୁ</small>
+  </div>
+
+  <div class="content">
+
+    <!-- ── STEPS ──────────────────────────────────────────── -->
+    <div class="steps">
+      <div class="steps-head">How to Submit / कैसे जमा करें</div>
+      <div class="steps-row">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">Choose<br>category</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">Tap the<br>card</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">Fill the<br>form</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">Submit<br>&amp; done</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <div class="div-text">Your Categories</div>
+      <div class="div-line"></div>
+    </div>
+
+    <!-- ── CARD 1: AMENITIES (Cyan) ────────────────────────── -->
+    <a class="form-card card-amenities"
+       href="https://tinyurl.com/Form-Amenities"
+       target="_blank" rel="noopener">
+      <div class="card-inner">
+        <div class="card-stripe stripe-cyan"></div>
+        <div class="card-header">
+          <div class="card-icon-wrap icon-cyan">🏗️</div>
+          <div class="card-titles">
+            <div class="card-en text-cyan">AMENITIES</div>
+            <div class="card-lang">सुविधाएं &nbsp;·&nbsp; ସୁବିଧା</div>
+            <div class="card-desc">Workplace Facility Concerns</div>
+          </div>
+          <div class="card-arrow arr-cyan">›</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-cyan">🚻 Restroom</span>
+          <span class="tag tag-cyan">💧 Drinking Water</span>
+          <span class="tag tag-cyan">🍽️ Canteen</span>
+          <span class="tag tag-cyan">🪑 Seating</span>
+          <span class="tag tag-cyan">🏢 Infrastructure</span>
+        </div>
+        <div class="card-foot">
+          <span class="card-url">tinyurl.com/Form-Amenities</span>
+          <span class="open-btn btn-cyan">OPEN FORM →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- ── CARD 2: EMPLOYMENT (Purple) ─────────────────────── -->
+    <a class="form-card card-employment"
+       href="https://tinyurl.com/Form-Employment"
+       target="_blank" rel="noopener">
+      <div class="card-inner">
+        <div class="card-stripe stripe-purple"></div>
+        <div class="card-header">
+          <div class="card-icon-wrap icon-purple">👔</div>
+          <div class="card-titles">
+            <div class="card-en text-purple">EMPLOYMENT ISSUES</div>
+            <div class="card-lang">रोजगार समस्याएं &nbsp;·&nbsp; ନିୟୋଜନ</div>
+            <div class="card-desc">HR, Payroll &amp; Service Matters</div>
+          </div>
+          <div class="card-arrow arr-purple">›</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-purple">👔 Manager Issues</span>
+          <span class="tag tag-purple">📅 Leave Deduction</span>
+          <span class="tag tag-purple">💰 Salary</span>
+          <span class="tag tag-purple">🏥 Mediclaim</span>
+          <span class="tag tag-purple">🔄 Transfer</span>
+          <span class="tag tag-purple">📚 Study Leave</span>
+        </div>
+        <div class="card-foot">
+          <span class="card-url">tinyurl.com/Form-Employment</span>
+          <span class="open-btn btn-purple">OPEN FORM →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- ── CARD 3: SAFETY (Maroon) ─────────────────────────── -->
+    <a class="form-card card-safety"
+       href="https://tinyurl.com/Form-Safety-Related"
+       target="_blank" rel="noopener">
+      <div class="card-inner">
+        <div class="card-stripe stripe-maroon"></div>
+        <div class="card-header">
+          <div class="card-icon-wrap icon-maroon">🛡️</div>
+          <div class="card-titles">
+            <div class="card-en text-maroon">SAFETY &amp; WELL-BEING</div>
+            <div class="card-lang">सुरक्षा एवं कल्याण &nbsp;·&nbsp; ସୁରକ୍ଷା</div>
+            <div class="card-desc">Safety, Hazards &amp; Women's Safety</div>
+          </div>
+          <div class="card-arrow arr-maroon">›</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag tag-maroon">⚠️ Workplace Safety</span>
+          <span class="tag tag-maroon">🏭 Shop Floor</span>
+          <span class="tag tag-maroon">🚨 Emergency</span>
+          <span class="tag tag-maroon">👩 Women's Safety</span>
+          <span class="tag tag-maroon">🧠 Well-Being</span>
+        </div>
+        <div class="card-foot">
+          <span class="card-url">tinyurl.com/Form-Safety-Related</span>
+          <span class="open-btn btn-maroon">OPEN FORM →</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- ── PRIVACY ─────────────────────────────────────────── -->
+    <div class="privacy">
+      <div class="priv-icon">🔒</div>
+      <div class="priv-text">
+        <b>100% Anonymous &amp; Confidential</b>
+        पूर्णतः गोपनीय &nbsp;·&nbsp; ସମ୍ପୂର୍ଣ ଗୋପନୀୟ<br>
+        Responses reviewed only by authorised HR. No retaliation guaranteed.
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- ── FOOTER ──────────────────────────────────────────── -->
+  <div class="footer">
+    <p>
+      SAMVAD AI &nbsp;·&nbsp; Tata Steel Limited, Meramandali, Odisha<br>
+      Sanjana Singh &nbsp;·&nbsp; MBA HR Intern &nbsp;·&nbsp; sanjanasingh1265@gmail.com
+    </p>
+    <div class="footer-badge">
+      <div class="badge-dot"></div>
+      SAMVAD v2.0 &nbsp;·&nbsp; May 2025
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+</body>
+</html>

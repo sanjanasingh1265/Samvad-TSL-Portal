@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMVAD AI — HR Grievance Management Dashboard | Tata Steel Meramandali</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --navy:        #0A1628;
+  --navy-2:      #0F2040;
+  --royal:       #003087;
+  --royal-2:     #0044CC;
+  --gold:        #C8922A;
+  --gold-lt:     #F0D080;
+  --gold-dim:    rgba(200,146,42,0.15);
+  --white:       #FFFFFF;
+  --gray-50:     #F8FAFC;
+  --gray-100:    #EEF2F7;
+  --gray-200:    #D8E0EC;
+  --gray-400:    #8899BB;
+  --gray-600:    #4A5C7A;
+  --open-bg:     #FFF1F0;
+  --open-fg:     #C62828;
+  --wip-bg:      #FFF8E1;
+  --wip-fg:      #E65100;
+  --closed-bg:   #F0FFF4;
+  --closed-fg:   #1B5E20;
+  --amenity:     #E65100;
+  --employ:      #1565C0;
+  --safety:      #B71C1C;
+  --other-cat:   #37474F;
+  --sidebar-w:   260px;
+  --header-h:    64px;
+  --radius:      12px;
+  --shadow:      0 4px 24px rgba(0,0,0,0.12);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
+
+/* ── TRICOLOR ── */
+.tricolor-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+  background: linear-gradient(to right,#E65100 33.33%,#fff 33.33%,#fff 66.66%,#2E7D32 66.66%);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; top: 3px; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--navy-2);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column;
+  overflow-y: auto; z-index: 100;
+  transition: transform 0.3s ease;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.brand-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 4px;
+}
+.brand-sub { font-size: 10px; color: var(--gray-400); letter-spacing: 1.5px; margin-top: 2px; }
+.brand-org { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 6px; line-height: 1.5; }
+
+.sidebar-section-label {
+  padding: 16px 20px 6px;
+  font-size: 9px; font-weight: 700;
+  color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  font-size: 13px; color: var(--gray-400);
+  text-decoration: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
+.nav-item.active {
+  background: rgba(200,146,42,0.1); color: var(--gold);
+  border-left-color: var(--gold);
+}
+.nav-icon { font-size: 16px; width: 22px; text-align: center; }
+.nav-badge {
+  margin-left: auto; background: var(--open-fg);
+  color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px;
+}
+
+.sidebar-footer {
+  margin-top: auto; padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 10px; color: var(--gray-400); line-height: 1.8;
+}
+.version-badge {
+  display: inline-block; background: var(--gold-dim);
+  border: 1px solid rgba(200,146,42,0.3);
+  color: var(--gold); font-size: 9px; font-weight: 700;
+  padding: 2px 10px; border-radius: 20px; letter-spacing: 1px; margin-top: 4px;
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── TOP HEADER ── */
+.topbar {
+  position: sticky; top: 3px; z-index: 90;
+  height: var(--header-h);
+  background: rgba(10,22,40,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 28px;
+}
+.topbar-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px; font-weight: 600; color: var(--white);
+  flex: 1;
+}
+.topbar-meta { font-size: 12px; color: var(--gray-400); }
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;
+  animation: pulse 2s infinite; display: inline-block; margin-right: 6px;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
+
+.btn {
+  padding: 8px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-lt); }
+.btn-outline { background: transparent; color: var(--gray-400); border: 1px solid rgba(255,255,255,0.12); }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── CONTENT ── */
+.content { padding: 28px; flex: 1; }
+
+/* ── SECTION ── */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px; gap: 16px;
+}
+.page-header-left h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--white);
+}
+.page-header-left p { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+
+/* ── KPI CARDS ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--navy-2);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent, var(--gold));
+}
+.kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+.kpi-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 36px; font-weight: 700; line-height: 1;
+  color: var(--accent, var(--gold));
+}
+.kpi-sub { font-size: 11px; color: var(--gray-400); margin-top: 6px; }
+.kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: 0.15; }
+
+/* ── GRID 2-COL ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media(max-width:900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+/* ── CARD ── */
+.card {
+  background: var(--navy-2);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden; margin-bottom: 20px;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.card-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--white);
+}
+.card-body { padding: 20px; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12px;
+}
+thead th {
+  background: rgba(255,255,255,0.04);
+  color: var(--gray-400);
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody td {
+  padding: 10px 14px; color: rgba(255,255,255,0.85);
+  vertical-align: middle;
+}
+.td-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+}
+.badge-open    { background: var(--open-bg);   color: var(--open-fg); }
+.badge-wip     { background: var(--wip-bg);    color: var(--wip-fg); }
+.badge-closed  { background: var(--closed-bg); color: var(--closed-fg); }
+.badge-high    { background: #FFEBEE; color: #C62828; }
+.badge-medium  { background: #FFF3E0; color: #E65100; }
+.badge-low     { background: #F3E5F5; color: #6A1B9A; }
+.badge-amenity { background: #FBE9E7; color: var(--amenity); }
+.badge-employ  { background: #E3F2FD; color: var(--employ); }
+.badge-safety  { background: #FFEBEE; color: var(--safety); }
+
+/* ── PROGRESS BAR ── */
+.progress-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+/* ── FILTER ROW ── */
+.filter-row {
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.filter-row select, .filter-row input {
+  background: var(--navy-2); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--white); border-radius: 8px; padding: 8px 14px;
+  font-size: 12px; font-family: 'DM Sans', sans-serif;
+  outline: none; cursor: pointer;
+}
+.filter-row select:focus, .filter-row input:focus { border-color: var(--gold); }
+.filter-row label { font-size: 11px; color: var(--gray-400); }
+
+/* ── STATUS TIMELINE ── */
+.timeline { padding: 0 20px 20px; }
+.timeline-item {
+  display: flex; gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.timeline-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; margin-top: 2px;
+}
+.timeline-content { flex: 1; }
+.timeline-title { font-size: 13px; font-weight: 600; color: var(--white); }
+.timeline-meta { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+.timeline-remark { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 6px; font-style: italic; }
+.timeline-status { font-size: 11px; margin-top: 6px; }
+
+/* ── DEPARTMENT CARDS ── */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px; margin-bottom: 20px;
+}
+.dept-card {
+  background: var(--navy-2);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 18px;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s;
+}
+.dept-card:hover { transform: translateY(-2px); }
+.dept-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--accent, var(--gold));
+}
+.dept-name { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+.dept-hrbp { font-size: 11px; color: var(--gray-400); margin-bottom: 12px; }
+.dept-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;
+}
+.dept-stat { text-align: center; }
+.dept-stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; }
+.dept-stat-lbl { font-size: 9px; color: var(--gray-400); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.dept-rating {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.dept-rating-text { font-size: 11px; font-weight: 700; }
+
+/* ── HRBP CARD ── */
+.hrbp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px; margin-bottom: 20px;
+}
+.hrbp-card {
+  background: var(--navy-2);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.hrbp-card:hover { transform: translateY(-2px); }
+.hrbp-card-header {
+  padding: 16px 18px;
+  background: var(--accent-bg, rgba(0,48,135,0.4));
+  display: flex; align-items: center; gap: 12px;
+}
+.hrbp-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent, var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: var(--navy);
+  flex-shrink: 0;
+}
+.hrbp-name { font-size: 15px; font-weight: 700; color: var(--white); }
+.hrbp-divs { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.hrbp-rating-badge {
+  margin-left: auto; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+}
+.hrbp-card-body { padding: 16px 18px; }
+.hrbp-metrics {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px;
+}
+.hrbp-metric { text-align: center; }
+.hrbp-metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+.hrbp-metric-lbl { font-size: 9px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.hrbp-tat-bar { margin-top: 12px; }
+.hrbp-tat-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--gray-400); margin-bottom: 4px; }
+
+/* ── CATEGORY SECTION ── */
+.cat-section { margin-bottom: 24px; }
+.cat-section-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.03);
+}
+.cat-icon { font-size: 20px; }
+.cat-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--white); }
+.cat-count { margin-left: auto; font-size: 11px; color: var(--gray-400); }
+.cat-items { border: 1px solid rgba(255,255,255,0.06); border-top: none; border-radius: 0 0 var(--radius) var(--radius); }
+.cat-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.cat-item:last-child { border-bottom: none; }
+.cat-item-name { font-size: 12px; color: rgba(255,255,255,0.8); flex: 1; }
+.cat-item-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600;
+  width: 30px; text-align: center;
+}
+.cat-item-bar { flex: 2; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.cat-item-fill { height: 100%; border-radius: 2px; }
+
+/* ── SATISFACTION ── */
+.likert-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.likert-card {
+  border-radius: var(--radius); padding: 16px;
+  text-align: center; border: 1px solid rgba(255,255,255,0.06);
+  transition: transform 0.2s;
+}
+.likert-card:hover { transform: scale(1.03); }
+.likert-emoji { font-size: 32px; margin-bottom: 8px; }
+.likert-score {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 700; line-height: 1;
+}
+.likert-label { font-size: 10px; color: var(--gray-400); margin-top: 4px; letter-spacing: 0.5px; }
+.likert-count { font-size: 18px; font-weight: 700; margin-top: 8px; }
+.likert-pct { font-size: 11px; color: var(--gray-400); }
+
+/* ── QUICK ACTIONS ── */
+.quick-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.quick-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04); color: var(--white);
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+.quick-btn:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+/* ── DONUT CHART ── */
+.donut-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 16px; }
+.donut-wrap svg { width: 100%; height: 100%; }
+.donut-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  text-align: center;
+}
+.donut-center-val {
+  font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: var(--white);
+}
+.donut-center-lbl { font-size: 10px; color: var(--gray-400); }
+.legend { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(255,255,255,0.8); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(198,40,40,0.1); border: 1px solid rgba(198,40,40,0.3);
+  border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px;
+  font-size: 12px; color: #FFCDD2;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* ── SAMVAD PORTAL LINK CARD ── */
+.portal-card {
+  background: linear-gradient(135deg, #003087 0%, #001B52 100%);
+  border-radius: var(--radius); padding: 20px;
+  border: 1px solid rgba(200,146,42,0.3);
+  display: flex; align-items: center; gap: 20px;
+  margin-bottom: 20px;
+}
+.portal-qr { font-size: 48px; }
+.portal-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--gold); }
+.portal-info p { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; line-height: 1.6; }
+.portal-links { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.portal-link {
+  padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  text-decoration: none; transition: all 0.2s;
+}
+.portal-link-amenity { background: rgba(230,81,0,0.2); color: #FF8F00; border: 1px solid rgba(230,81,0,0.4); }
+.portal-link-employ  { background: rgba(21,101,192,0.2); color: #64B5F6; border: 1px solid rgba(21,101,192,0.4); }
+.portal-link-safety  { background: rgba(183,28,28,0.2); color: #EF9A9A; border: 1px solid rgba(183,28,28,0.4); }
+.portal-link:hover { opacity: 0.85; transform: translateY(-1px); }
+
+/* ── FORM MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--navy-2); border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 560px; max-width: 95vw; max-height: 90vh;
+  overflow-y: auto; padding: 28px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--gold); }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-400); letter-spacing: 0.5px; margin-bottom: 6px; text-transform: uppercase; }
+.form-control {
+  width: 100%; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 10px 14px; color: var(--white); font-size: 13px;
+  font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.2s;
+}
+.form-control:focus { border-color: var(--gold); }
+.form-control option { background: var(--navy-2); }
+textarea.form-control { resize: vertical; min-height: 80px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="tricolor-bar"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-title">SAMVAD</div>
+    <div class="brand-sub">संवाद AI · ସଂଭାଦ AI</div>
+    <div class="brand-org">Tata Steel Limited<br>Meramandali Plant, Odisha</div>
+  </div>
+
+  <div class="sidebar-section-label">Main Dashboards</div>
+  <a class="nav-item active" onclick="showSection('overview')" href="#">
+    <span class="nav-icon">🏠</span> Overview
+  </a>
+  <a class="nav-item" onclick="showSection('live-status')" href="#">
+    <span class="nav-icon">🟢</span> Live Status Monitor
+    <span class="nav-badge" id="open-count-nav">6</span>
+  </a>
+  <a class="nav-item" onclick="showSection('grievance-register')" href="#">
+    <span class="nav-icon">📋</span> Grievance Register
+  </a>
+
+  <div class="sidebar-section-label">Analytics</div>
+  <a class="nav-item" onclick="showSection('dept-tracker')" href="#">
+    <span class="nav-icon">🏭</span> Department Tracker
+  </a>
+  <a class="nav-item" onclick="showSection('hrbp-dashboard')" href="#">
+    <span class="nav-icon">👤</span> HRBP Performance
+  </a>
+  <a class="nav-item" onclick="showSection('category-analysis')" href="#">
+    <span class="nav-icon">📊</span> Category Analysis
+  </a>
+  <a class="nav-item" onclick="showSection('kpi-dashboard')" href="#">
+    <span class="nav-icon">📈</span> KPI Dashboard
+  </a>
+  <a class="nav-item" onclick="showSection('satisfaction')" href="#">
+    <span class="nav-icon">⭐</span> Satisfaction Scores
+  </a>
+
+  <div class="sidebar-section-label">System</div>
+  <a class="nav-item" onclick="showSection('samvad-portal')" href="#">
+    <span class="nav-icon">📱</span> SAMVAD Portal Links
+  </a>
+
+  <div class="sidebar-footer">
+    <div>HR Contact: sanjanasingh1265@gmail.com</div>
+    <div>English · हिन्दी · ଓଡ଼ିଆ</div>
+    <div class="version-badge">SAMVAD v2.0 · May 2025</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Executive Overview</div>
+    <div class="topbar-meta"><span class="live-dot"></span>LIVE · 18 May 2025</div>
+    <button class="btn btn-outline" onclick="openModal('add-grievance')">+ Log Grievance</button>
+    <button class="btn btn-gold" onclick="window.print()">↓ Export</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ════════════════ OVERVIEW SECTION ════════════════ -->
+    <div class="section active" id="section-overview">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>HR Grievance Intelligence Dashboard</h1>
+          <p>Real-time tracking of all SAMVAD AI submissions across Tata Steel Meramandali · May 2025</p>
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <strong>6 High-Priority Open Cases</strong> require immediate HRBP attention — Iron Making (2), Steel Making (1), Safety (2), Supply Chain (1)
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent:#C8922A">
+          <div class="kpi-label">Total Grievances</div>
+          <div class="kpi-value">15</div>
+          <div class="kpi-sub">May 2025 · All divisions</div>
+          <div class="kpi-icon">📋</div>
+        </div>
+        <div class="kpi-card" style="--accent:#C62828">
+          <div class="kpi-label">Open Cases</div>
+          <div class="kpi-value">6</div>
+          <div class="kpi-sub">Awaiting HRBP action</div>
+          <div class="kpi-icon">🔴</div>
+        </div>
+        <div class="kpi-card" style="--accent:#E65100">
+          <div class="kpi-label">Work in Progress</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-sub">Being addressed</div>
+          <div class="kpi-icon">🔄</div>
+        </div>
+        <div class="kpi-card" style="--accent:#2E7D32">
+          <div class="kpi-label">Cases Closed</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-sub">Successfully resolved</div>
+          <div class="kpi-icon">✅</div>
+        </div>
+        <div class="kpi-card" style="--accent:#006064">
+          <div class="kpi-label">Within 30-Day Rate</div>
+          <div class="kpi-value">100%</div>
+          <div class="kpi-sub">All closed cases on time</div>
+          <div class="kpi-icon">🎯</div>
+        </div>
+        <div class="kpi-card" style="--accent:#4A148C">
+          <div class="kpi-label">Avg Resolution Time</div>
+          <div class="kpi-value">4.2d</div>
+          <div class="kpi-sub">Closed cases average</div>
+          <div class="kpi-icon">⏱️</div>
+        </div>
+        <div class="kpi-card" style="--accent:#F9A825">
+          <div class="kpi-label">Avg Satisfaction Score</div>
+          <div class="kpi-value">4.5</div>
+          <div class="kpi-sub">Out of 5 · Likert Scale</div>
+          <div class="kpi-icon">⭐</div>
+        </div>
+        <div class="kpi-card" style="--accent:#B71C1C">
+          <div class="kpi-label">High Priority Open</div>
+          <div class="kpi-value">6</div>
+          <div class="kpi-sub">Needs immediate action</div>
+          <div class="kpi-icon">🚨</div>
+        </div>
+      </div>
+
+      <!-- Donut + Timeline row -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3>📊 Status Distribution</h3>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 160 160">
+                <!-- Closed 33.3% -->
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#2E7D32" stroke-width="20"
+                  stroke-dasharray="125.6 251.3" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+                <!-- WIP 26.7% -->
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#E65100" stroke-width="20"
+                  stroke-dasharray="100.5 251.3" stroke-dashoffset="-125.6" transform="rotate(-90 80 80)"/>
+                <!-- Open 40% -->
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#C62828" stroke-width="20"
+                  stroke-dasharray="100.5 251.3" stroke-dashoffset="-226.1" transform="rotate(-90 80 80)"/>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-center-val">15</div>
+                <div class="donut-center-lbl">TOTAL</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#C62828"></div>Open — 6 (40%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#E65100"></div>Work in Progress — 4 (27%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>Closed — 5 (33%)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>🏷️ Category Breakdown</h3>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#E65100" stroke-width="20"
+                  stroke-dasharray="100.5 251.3" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#1565C0" stroke-width="20"
+                  stroke-dasharray="117.3 251.3" stroke-dashoffset="-100.5" transform="rotate(-90 80 80)"/>
+                <circle cx="80" cy="80" r="60" fill="none" stroke="#B71C1C" stroke-width="20"
+                  stroke-dasharray="83.8 251.3" stroke-dashoffset="-217.8" transform="rotate(-90 80 80)"/>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-center-val">3</div>
+                <div class="donut-center-lbl">TYPES</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#E65100"></div>Amenities — 6 (40%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>Employment — 7 (47%)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#B71C1C"></div>Safety — 4 (27%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HRBP Summary Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3>👤 HRBP Quick Summary</h3>
+          <span style="font-size:11px;color:var(--gray-400)">Performance at a glance</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>HRBP Name</th><th>Division(s)</th><th>Total</th>
+                <th>Open</th><th>WIP</th><th>Closed</th>
+                <th>Within 30D%</th><th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Priya Sharma</strong></td><td>Iron Making · Asset & Energy</td><td>4</td><td><span class="badge badge-open">2 Open</span></td><td>1</td><td>2</td><td>100%</td><td>✅ Good</td></tr>
+              <tr><td><strong>Rajesh Kumar</strong></td><td>Steel Making</td><td>3</td><td><span class="badge badge-open">2 Open</span></td><td>0</td><td>2</td><td>100%</td><td>✅ Good</td></tr>
+              <tr><td><strong>Anita Nair</strong></td><td>Asset & Energy · IT</td><td>3</td><td><span class="badge badge-open">0 Open</span></td><td>1</td><td>2</td><td>100%</td><td>🌟 Excellent</td></tr>
+              <tr><td><strong>Suresh Patel</strong></td><td>Corporate · HRM</td><td>3</td><td><span class="badge badge-open">1 Open</span></td><td>2</td><td>0</td><td>—</td><td>🔄 Active</td></tr>
+              <tr><td><strong>Meena Joshi</strong></td><td>Supply Chain · Finance</td><td>2</td><td><span class="badge badge-open">1 Open</span></td><td>1</td><td>0</td><td>—</td><td>🔄 Active</td></tr>
+              <tr><td><strong>Arjun Das</strong></td><td>Engineering Projects</td><td>2</td><td><span class="badge badge-open">1 Open</span></td><td>0</td><td>0</td><td>—</td><td>⚠️ Review</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ LIVE STATUS SECTION ════════════════ -->
+    <div class="section" id="section-live-status">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>🟢 Live Status Monitor</h1>
+          <p>Real-time grievance progress tracker · Auto-refreshes every 5 minutes · <span class="live-dot"></span>LIVE</p>
+        </div>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="filterStatus('All')">All</button>
+          <button class="quick-btn" onclick="filterStatus('Open')">🔴 Open</button>
+          <button class="quick-btn" onclick="filterStatus('Work in Progress')">🟡 WIP</button>
+          <button class="quick-btn" onclick="filterStatus('Closed')">🟢 Closed</button>
+        </div>
+      </div>
+
+      <div class="timeline" id="timeline-container">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- ════════════════ GRIEVANCE REGISTER ════════════════ -->
+    <div class="section" id="section-grievance-register">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📋 Grievance Data Register</h1>
+          <p>Master record of all SAMVAD AI submissions — Connected to QR Portal</p>
+        </div>
+      </div>
+      <div class="filter-row">
+        <label>Filter by Division:</label>
+        <select id="filter-dept" onchange="renderGrievanceTable()">
+          <option value="">All Divisions</option>
+          <option>Iron Making Operations</option>
+          <option>Steel Making Operations</option>
+          <option>Asset & Energy Management</option>
+          <option>Corporate Services</option>
+          <option>Supply Chain & Logistics</option>
+          <option>Engineering Projects</option>
+          <option>Finance & Business Accounting</option>
+          <option>HRM</option>
+          <option>IT</option>
+        </select>
+        <label>Category:</label>
+        <select id="filter-cat" onchange="renderGrievanceTable()">
+          <option value="">All Categories</option>
+          <option>Amenities</option>
+          <option>Employment Issues</option>
+          <option>Safety & Well-Being</option>
+        </select>
+        <label>Status:</label>
+        <select id="filter-status" onchange="renderGrievanceTable()">
+          <option value="">All</option>
+          <option>Open</option>
+          <option>Work in Progress</option>
+          <option>Closed</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="grievance-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Date</th><th>Division</th><th>HRBP</th>
+                <th>Category</th><th>Sub-Category</th><th>Priority</th>
+                <th>Status</th><th>TAT (days)</th><th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="grievance-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ DEPT TRACKER ════════════════ -->
+    <div class="section" id="section-dept-tracker">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>🏭 Department / Division Tracker</h1>
+          <p>Division-wise grievance accountability — HRBP ownership and resolution monitoring</p>
+        </div>
+      </div>
+      <div class="dept-grid" id="dept-cards"></div>
+    </div>
+
+    <!-- ════════════════ HRBP DASHBOARD ════════════════ -->
+    <div class="section" id="section-hrbp-dashboard">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>👤 HRBP Performance Dashboard</h1>
+          <p>Individual HRBP accountability, caseload and resolution efficiency metrics</p>
+        </div>
+      </div>
+      <div class="hrbp-grid" id="hrbp-cards"></div>
+    </div>
+
+    <!-- ════════════════ CATEGORY ANALYSIS ════════════════ -->
+    <div class="section" id="section-category-analysis">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📊 Category Analysis & Trends</h1>
+          <p>Deep-dive into concern categories to identify recurring pain points and improvement opportunities</p>
+        </div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="cat-section">
+        <div class="cat-section-header" style="background:rgba(230,81,0,0.1);border-color:rgba(230,81,0,0.3)">
+          <span class="cat-icon">🏗️</span>
+          <span class="cat-title" style="color:#FF8F00">AMENITIES</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.5)">सुविधाएं · ସୁବିଧା — Workplace Facility Concerns</span>
+          <span class="cat-count">6 grievances</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item"><span class="cat-item-name">🚻 Restroom/Washroom</span><span class="cat-item-count" style="color:#E65100">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:17%;background:#E65100"></div></div><span class="badge badge-closed">Closed</span></div>
+          <div class="cat-item"><span class="cat-item-name">💧 Drinking Water</span><span class="cat-item-count" style="color:#E65100">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:17%;background:#E65100"></div></div><span class="badge badge-closed">Closed</span></div>
+          <div class="cat-item"><span class="cat-item-name">🍽️ Canteen Food Quality</span><span class="cat-item-count" style="color:#E65100">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:17%;background:#E65100"></div></div><span class="badge badge-wip">WIP</span></div>
+          <div class="cat-item"><span class="cat-item-name">🪑 Seating & Rest Area</span><span class="cat-item-count" style="color:#E65100">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:17%;background:#E65100"></div></div><span class="badge badge-open">Open</span></div>
+          <div class="cat-item"><span class="cat-item-name">🏢 Infrastructure</span><span class="cat-item-count" style="color:#E65100">2</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:33%;background:#E65100"></div></div><span class="badge badge-closed">1 Closed · 1 Open</span></div>
+        </div>
+      </div>
+
+      <!-- Employment -->
+      <div class="cat-section">
+        <div class="cat-section-header" style="background:rgba(21,101,192,0.1);border-color:rgba(21,101,192,0.3)">
+          <span class="cat-icon">👔</span>
+          <span class="cat-title" style="color:#64B5F6">EMPLOYMENT ISSUES</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.5)">रोजगार समस्याएं — HR, Payroll & Service Matters</span>
+          <span class="cat-count">7 grievances</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item"><span class="cat-item-name">👔 Manager Issues</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-open">Open</span></div>
+          <div class="cat-item"><span class="cat-item-name">📅 Leave Deduction</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-closed">Closed</span></div>
+          <div class="cat-item"><span class="cat-item-name">💰 Salary / Payroll</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-wip">WIP</span></div>
+          <div class="cat-item"><span class="cat-item-name">🏥 Mediclaim Support</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-open">Open</span></div>
+          <div class="cat-item"><span class="cat-item-name">🔄 Transfer</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-wip">WIP</span></div>
+          <div class="cat-item"><span class="cat-item-name">📚 Study Leave</span><span class="cat-item-count" style="color:#1565C0">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:14%;background:#1565C0"></div></div><span class="badge badge-open">Open</span></div>
+        </div>
+      </div>
+
+      <!-- Safety -->
+      <div class="cat-section">
+        <div class="cat-section-header" style="background:rgba(183,28,28,0.1);border-color:rgba(183,28,28,0.3)">
+          <span class="cat-icon">🛡️</span>
+          <span class="cat-title" style="color:#EF9A9A">SAFETY & WELL-BEING</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.5)">सुरक्षा — Hazards, Women's Safety & Psychological Safety</span>
+          <span class="cat-count">4 grievances</span>
+        </div>
+        <div class="cat-items">
+          <div class="cat-item"><span class="cat-item-name">⚠️ Workplace Safety</span><span class="cat-item-count" style="color:#B71C1C">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:25%;background:#B71C1C"></div></div><span class="badge badge-closed">Closed</span></div>
+          <div class="cat-item"><span class="cat-item-name">🏭 Shop Floor Safety</span><span class="cat-item-count" style="color:#B71C1C">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:25%;background:#B71C1C"></div></div><span class="badge badge-wip">WIP</span></div>
+          <div class="cat-item"><span class="cat-item-name">👩 Women's Safety</span><span class="cat-item-count" style="color:#B71C1C">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:25%;background:#B71C1C"></div></div><span class="badge badge-open">Open</span></div>
+          <div class="cat-item"><span class="cat-item-name">🧠 Psychological Safety</span><span class="cat-item-count" style="color:#B71C1C">1</span><div class="cat-item-bar"><div class="cat-item-fill" style="width:25%;background:#B71C1C"></div></div><span class="badge badge-open">Open</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ KPI DASHBOARD ════════════════ -->
+    <div class="section" id="section-kpi-dashboard">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📈 KPI & HR Analytics Dashboard</h1>
+          <p>Strategic HR metrics for leadership decision-making — May 2025 Reporting Period</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent:#2E7D32">
+          <div class="kpi-label">Resolution Rate</div>
+          <div class="kpi-value">33%</div>
+          <div class="kpi-sub">5 of 15 cases closed</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:33%;background:#2E7D32"></div></div>
+          <div class="kpi-icon">📈</div>
+        </div>
+        <div class="kpi-card" style="--accent:#C8922A">
+          <div class="kpi-label">Within 30-Day SLA</div>
+          <div class="kpi-value">100%</div>
+          <div class="kpi-sub">All closed cases within SLA</div>
+          <div class="kpi-icon">🎯</div>
+        </div>
+        <div class="kpi-card" style="--accent:#1565C0">
+          <div class="kpi-label">Avg TAT (Closed)</div>
+          <div class="kpi-value">4.2</div>
+          <div class="kpi-sub">Days · Target: ≤15 days</div>
+          <div class="kpi-icon">⏱️</div>
+        </div>
+        <div class="kpi-card" style="--accent:#F9A825">
+          <div class="kpi-label">Employee Satisfaction</div>
+          <div class="kpi-value">4.5/5</div>
+          <div class="kpi-sub">Likert Scale · 5 responses</div>
+          <div class="kpi-icon">⭐</div>
+        </div>
+        <div class="kpi-card" style="--accent:#006064">
+          <div class="kpi-label">Safety Grievances</div>
+          <div class="kpi-value">4</div>
+          <div class="kpi-sub">27% of total · High priority</div>
+          <div class="kpi-icon">🛡️</div>
+        </div>
+        <div class="kpi-card" style="--accent:#4A148C">
+          <div class="kpi-label">Recurring Category</div>
+          <div class="kpi-value">Employ.</div>
+          <div class="kpi-sub">7 cases — 47% of total</div>
+          <div class="kpi-icon">🔁</div>
+        </div>
+      </div>
+
+      <!-- KPI table -->
+      <div class="card">
+        <div class="card-header"><h3>📋 KPI Scorecard — HRBP Performance Matrix</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>HRBP</th><th>Division(s)</th><th>Total Cases</th>
+                <th>Closed</th><th>Open</th><th>WIP</th>
+                <th>Avg TAT</th><th>Within 30D%</th><th>Satisfaction</th><th>Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Priya Sharma</strong></td><td>Iron Making · Asset & Energy</td><td>4</td><td>2</td><td>2</td><td>1</td><td>4.5d</td><td>100%</td><td>4.5★</td><td>✅ Good</td></tr>
+              <tr><td><strong>Rajesh Kumar</strong></td><td>Steel Making</td><td>3</td><td>2</td><td>2</td><td>0</td><td>9.0d</td><td>100%</td><td>5.0★</td><td>✅ Good</td></tr>
+              <tr><td><strong>Anita Nair</strong></td><td>Asset & Energy · IT</td><td>3</td><td>2</td><td>0</td><td>1</td><td>1.5d</td><td>100%</td><td>5.0★</td><td>🌟 Excellent</td></tr>
+              <tr><td><strong>Suresh Patel</strong></td><td>Corporate · HRM</td><td>3</td><td>0</td><td>1</td><td>2</td><td>—</td><td>—</td><td>—</td><td>⚠️ Review</td></tr>
+              <tr><td><strong>Meena Joshi</strong></td><td>Supply Chain · Finance</td><td>2</td><td>0</td><td>1</td><td>1</td><td>—</td><td>—</td><td>—</td><td>🔄 Active</td></tr>
+              <tr><td><strong>Arjun Das</strong></td><td>Engineering Projects</td><td>2</td><td>0</td><td>1</td><td>0</td><td>—</td><td>—</td><td>—</td><td>⚠️ Review</td></tr>
+              <tr style="background:rgba(200,146,42,0.08)"><td><strong>TOTAL</strong></td><td>All Divisions</td><td><strong>15</strong></td><td><strong>5</strong></td><td><strong>6</strong></td><td><strong>4</strong></td><td><strong>4.2d</strong></td><td><strong>100%</strong></td><td><strong>4.5★</strong></td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Recommendations -->
+      <div class="card">
+        <div class="card-header"><h3>🎯 HR Action Recommendations</h3></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="background:rgba(198,40,40,0.08);border:1px solid rgba(198,40,40,0.2);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:700;color:#EF9A9A;letter-spacing:1px;margin-bottom:10px;">🚨 IMMEDIATE ACTION (This Week)</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2;">
+                • Women's Safety issue (GRV-006) — Lighting audit required<br>
+                • Psychological Safety case (GRV-013) — EAP counselor to be assigned<br>
+                • Mediclaim pending 60+ days (GRV-008) — Escalate to insurance partner<br>
+                • PPE unavailability (GRV-012) — Safety officer check mandatory
+              </div>
+            </div>
+            <div style="background:rgba(230,81,0,0.08);border:1px solid rgba(230,81,0,0.2);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:700;color:#FFB74D;letter-spacing:1px;margin-bottom:10px;">📅 SHORT-TERM (This Month)</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2;">
+                • Study Leave policy — Communication session with managers<br>
+                • Arjun Das (Engineering) — Needs case closure mentoring<br>
+                • Suresh Patel — HRM cases moving slowly; follow-up required<br>
+                • Canteen quality audit — Contractor review & improvement plan
+              </div>
+            </div>
+            <div style="background:rgba(21,101,192,0.08);border:1px solid rgba(21,101,192,0.2);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:700;color:#90CAF9;letter-spacing:1px;margin-bottom:10px;">📊 STRATEGIC (Next Quarter)</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2;">
+                • Employment issues (47%) — Systemic review of HR policies<br>
+                • Payroll accuracy audit — Reduce Leave Deduction grievances<br>
+                • Mediclaim process redesign — Reduce 60-day TAT to 15 days<br>
+                • HRBP capacity review — Suresh Patel handles 3 divisions
+              </div>
+            </div>
+            <div style="background:rgba(46,125,50,0.08);border:1px solid rgba(46,125,50,0.2);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:700;color:#A5D6A7;letter-spacing:1px;margin-bottom:10px;">🌟 BEST PRACTICES (Replicate)</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2;">
+                • Anita Nair's 1.5-day avg TAT — Share process with team<br>
+                • GRV-003 Safety response (24hr) — Template for emergencies<br>
+                • 100% within-30D rate — Maintain as department KPI target<br>
+                • 4.5/5 satisfaction score — Benchmark for SAMVAD AI system
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SATISFACTION ════════════════ -->
+    <div class="section" id="section-satisfaction">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>⭐ Employee Satisfaction & Happiness Tracker</h1>
+          <p>Post-resolution Likert Scale scores (1=Very Dissatisfied → 5=Very Satisfied) · 5 responses collected</p>
+        </div>
+      </div>
+
+      <div class="likert-grid">
+        <div class="likert-card" style="background:rgba(46,125,50,0.12);border-color:rgba(46,125,50,0.3)">
+          <div class="likert-emoji">🌟</div>
+          <div class="likert-score" style="color:#66BB6A">5</div>
+          <div class="likert-label">Very Satisfied</div>
+          <div class="likert-count" style="color:#66BB6A">3</div>
+          <div class="likert-pct">60% of responses</div>
+        </div>
+        <div class="likert-card" style="background:rgba(21,101,192,0.12);border-color:rgba(21,101,192,0.3)">
+          <div class="likert-emoji">😊</div>
+          <div class="likert-score" style="color:#64B5F6">4</div>
+          <div class="likert-label">Satisfied</div>
+          <div class="likert-count" style="color:#64B5F6">2</div>
+          <div class="likert-pct">40% of responses</div>
+        </div>
+        <div class="likert-card" style="background:rgba(74,90,120,0.12);border-color:rgba(74,90,120,0.3)">
+          <div class="likert-emoji">😐</div>
+          <div class="likert-score" style="color:#90A4AE">3</div>
+          <div class="likert-label">Neutral</div>
+          <div class="likert-count" style="color:#90A4AE">0</div>
+          <div class="likert-pct">0% of responses</div>
+        </div>
+        <div class="likert-card" style="background:rgba(230,81,0,0.08);border-color:rgba(230,81,0,0.2)">
+          <div class="likert-emoji">😟</div>
+          <div class="likert-score" style="color:#FFA726">2</div>
+          <div class="likert-label">Dissatisfied</div>
+          <div class="likert-count" style="color:#FFA726">0</div>
+          <div class="likert-pct">0% of responses</div>
+        </div>
+        <div class="likert-card" style="background:rgba(183,28,28,0.08);border-color:rgba(183,28,28,0.2)">
+          <div class="likert-emoji">😡</div>
+          <div class="likert-score" style="color:#EF5350">1</div>
+          <div class="likert-label">Very Dissatisfied</div>
+          <div class="likert-count" style="color:#EF5350">0</div>
+          <div class="likert-pct">0% of responses</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3>📊 Satisfaction Summary</h3></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div style="text-align:center;padding:16px;background:rgba(200,146,42,0.08);border-radius:10px;">
+                <div style="font-size:42px;font-weight:700;color:var(--gold);font-family:'Space Grotesk',sans-serif;">4.5</div>
+                <div style="font-size:11px;color:var(--gray-400);">Average Score / 5.0</div>
+              </div>
+              <div style="text-align:center;padding:16px;background:rgba(46,125,50,0.08);border-radius:10px;">
+                <div style="font-size:42px;font-weight:700;color:#66BB6A;font-family:'Space Grotesk',sans-serif;">100%</div>
+                <div style="font-size:11px;color:var(--gray-400);">% Satisfied (Score 4-5)</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">
+              <div style="font-size:11px;font-weight:700;color:var(--gray-400);margin-bottom:8px;">EMPLOYEE REMARKS</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2.2;font-style:italic;">
+                "Issue resolved promptly. Satisfied with response." — GRV-001 (Score: 4)<br>
+                "Very happy with resolution. Transparent process." — GRV-002 (Score: 5)<br>
+                "Exceptional response. Safety team acted immediately." — GRV-003 (Score: 5)<br>
+                "Quick fix. Appreciated." — GRV-007 (Score: 4)<br>
+                "Excellent support from IT helpdesk." — GRV-010 (Score: 5)
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>🏭 Department Satisfaction</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Division</th><th>Responses</th><th>Avg Score</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Iron Making Operations</td><td>2</td><td>4.0 ★</td><td>🟢 Healthy</td></tr>
+                <tr><td>Steel Making Operations</td><td>1</td><td>5.0 ★</td><td>🟢 Healthy</td></tr>
+                <tr><td>Asset & Energy Management</td><td>1</td><td>5.0 ★</td><td>🟢 Healthy</td></tr>
+                <tr><td>IT</td><td>1</td><td>5.0 ★</td><td>🟢 Healthy</td></tr>
+                <tr><td>Corporate / Supply Chain / Others</td><td>0</td><td>Pending</td><td>🟡 Awaiting</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ SAMVAD PORTAL ════════════════ -->
+    <div class="section" id="section-samvad-portal">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>📱 SAMVAD Portal — QR Links & Access</h1>
+          <p>Direct links to the three grievance forms — Deployed via QR codes at Meramandali Plant</p>
+        </div>
+      </div>
+
+      <div class="portal-card">
+        <div class="portal-qr">📱</div>
+        <div class="portal-info">
+          <h3>SAMVAD AI — One QR, Three Forms</h3>
+          <p>Employee scans QR code → Lands on SAMVAD Portal → Selects concern category → Submits anonymously<br>
+          100% Anonymous & Confidential · पूर्णतः गोपनीय · ସମ୍ପୂର୍ଣ ଗୋପନୀୟ<br>
+          English · हिन्दी · ଓଡ଼ିଆ — Available in 3 languages</p>
+          <div class="portal-links">
+            <a class="portal-link portal-link-amenity" href="https://tinyurl.com/Form-Amenities" target="_blank">🏗️ Amenities Form</a>
+            <a class="portal-link portal-link-employ" href="https://tinyurl.com/Form-Employment" target="_blank">👔 Employment Form</a>
+            <a class="portal-link portal-link-safety" href="https://tinyurl.com/Form-Safety-Related" target="_blank">🛡️ Safety Form</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card" style="border-color:rgba(230,81,0,0.3)">
+          <div class="card-header" style="background:rgba(230,81,0,0.08)"><h3 style="color:#FF8F00">🏗️ AMENITIES</h3></div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--gray-400);margin-bottom:12px;">Workplace Facility Concerns</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2.2;">
+              🚻 Restroom/Washroom<br>💧 Drinking Water<br>🍽️ Canteen Food<br>🪑 Seating & Rest<br>🏢 Infrastructure
+            </div>
+            <div style="margin-top:14px;padding:10px;background:rgba(230,81,0,0.08);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF8F00;">
+              tinyurl.com/Form-Amenities
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(21,101,192,0.3)">
+          <div class="card-header" style="background:rgba(21,101,192,0.08)"><h3 style="color:#64B5F6">👔 EMPLOYMENT</h3></div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--gray-400);margin-bottom:12px;">HR, Payroll & Service Matters</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2.2;">
+              👔 Manager Issues<br>📅 Leave Deduction<br>💰 Salary/Payroll<br>🏥 Mediclaim<br>🔄 Transfer / Study Leave
+            </div>
+            <div style="margin-top:14px;padding:10px;background:rgba(21,101,192,0.08);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#64B5F6;">
+              tinyurl.com/Form-Employment
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(183,28,28,0.3)">
+          <div class="card-header" style="background:rgba(183,28,28,0.08)"><h3 style="color:#EF9A9A">🛡️ SAFETY</h3></div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--gray-400);margin-bottom:12px;">Safety, Hazards & Well-Being</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.8);line-height:2.2;">
+              ⚠️ Workplace Safety<br>🏭 Shop Floor<br>🚨 Emergency/Hazard<br>👩 Women's Safety<br>🧠 Psychological Safety
+            </div>
+            <div style="margin-top:14px;padding:10px;background:rgba(183,28,28,0.08);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#EF9A9A;">
+              tinyurl.com/Form-Safety-Related
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ADD GRIEVANCE MODAL -->
+<div class="modal-overlay" id="modal-add-grievance">
+  <div class="modal">
+    <h2>➕ Log New Grievance</h2>
+    <div class="form-group">
+      <label class="form-label">Division / Department</label>
+      <select class="form-control">
+        <option value="">Select Division</option>
+        <option>Iron Making Operations</option>
+        <option>Steel Making Operations</option>
+        <option>Asset & Energy Management</option>
+        <option>Corporate Services</option>
+        <option>Supply Chain & Logistics</option>
+        <option>Engineering Projects</option>
+        <option>Finance & Business Accounting</option>
+        <option>HRM</option>
+        <option>IT</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Concern Category</label>
+      <select class="form-control">
+        <option>Amenities</option>
+        <option>Employment Issues</option>
+        <option>Safety & Well-Being</option>
+        <option>Others</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sub-Category</label>
+      <select class="form-control">
+        <option>Restroom/Washroom</option>
+        <option>Drinking Water</option>
+        <option>Canteen Food Quality</option>
+        <option>Seating & Rest</option>
+        <option>Manager Issues</option>
+        <option>Leave Deduction</option>
+        <option>Salary/Payroll</option>
+        <option>Mediclaim</option>
+        <option>Workplace Safety</option>
+        <option>Women's Safety</option>
+        <option>Others</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <select class="form-control">
+        <option>High</option><option>Medium</option><option>Low</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assign HRBP</label>
+      <select class="form-control">
+        <option>Priya Sharma</option><option>Rajesh Kumar</option>
+        <option>Anita Nair</option><option>Suresh Patel</option>
+        <option>Meena Joshi</option><option>Arjun Das</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Grievance Description</label>
+      <textarea class="form-control" placeholder="Brief description of the concern..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('add-grievance')">Cancel</button>
+      <button class="btn btn-gold" onclick="closeModal('add-grievance')">Submit Grievance</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const grievances = [
+  {id:"GRV-001",date:"05-May-2025",dept:"Iron Making Operations",hrbp:"Priya Sharma",cat:"Amenities",sub:"Restroom/Washroom",desc:"Washroom near Blast Furnace-2 non-functional and unhygienic",priority:"High",status:"Closed",tat:7,remark:"Maintenance completed on 11-May. Washroom repaired and sanitized."},
+  {id:"GRV-002",date:"06-May-2025",dept:"Steel Making Operations",hrbp:"Rajesh Kumar",cat:"Employment Issues",sub:"Leave Deduction",desc:"Earned leave wrongly deducted for medical emergency on 2nd May",priority:"High",status:"Closed",tat:9,remark:"Leave reversal processed. Salary corrected in May cycle."},
+  {id:"GRV-003",date:"07-May-2025",dept:"Asset & Energy Management",hrbp:"Anita Nair",cat:"Safety & Well-Being",sub:"Workplace Safety",desc:"Exposed live wire near Compressor House building B",priority:"High",status:"Closed",tat:1,remark:"Emergency repair done within 24hrs. Electrical hazard eliminated."},
+  {id:"GRV-004",date:"08-May-2025",dept:"Corporate Services",hrbp:"Suresh Patel",cat:"Amenities",sub:"Canteen Food Quality",desc:"Food quality in Canteen Block-3 below standard. Stale food served.",priority:"Medium",status:"Work in Progress",tat:10,remark:"Canteen contractor notified. Quality audit scheduled next week."},
+  {id:"GRV-005",date:"09-May-2025",dept:"Supply Chain & Logistics",hrbp:"Meena Joshi",cat:"Employment Issues",sub:"Salary/Payroll",desc:"April salary short by ₹3,200. Overtime not credited.",priority:"High",status:"Work in Progress",tat:9,remark:"Payroll team verifying overtime records. Resolution expected by 20-May."},
+  {id:"GRV-006",date:"10-May-2025",dept:"Engineering Projects",hrbp:"Arjun Das",cat:"Safety & Well-Being",sub:"Women's Safety",desc:"Inadequate lighting in parking area B used by women employees post 7PM",priority:"High",status:"Open",tat:8,remark:"Forwarded to Facilities and Security team."},
+  {id:"GRV-007",date:"11-May-2025",dept:"Iron Making Operations",hrbp:"Priya Sharma",cat:"Amenities",sub:"Drinking Water",desc:"RO purifier on Shop Floor C not working for 5 days",priority:"Medium",status:"Closed",tat:2,remark:"RO filters replaced. Water quality tested and certified."},
+  {id:"GRV-008",date:"12-May-2025",dept:"Steel Making Operations",hrbp:"Rajesh Kumar",cat:"Employment Issues",sub:"Mediclaim Support",desc:"Mediclaim reimbursement pending for 60 days for hospitalization claim",priority:"High",status:"Open",tat:6,remark:"Escalated to insurance team. Documents re-submitted."},
+  {id:"GRV-009",date:"13-May-2025",dept:"HRM",hrbp:"Suresh Patel",cat:"Employment Issues",sub:"Transfer",desc:"Transfer request pending since January 2025. No update received.",priority:"Medium",status:"Work in Progress",tat:5,remark:"Transfer committee meeting scheduled. Employee informed."},
+  {id:"GRV-010",date:"14-May-2025",dept:"IT",hrbp:"Anita Nair",cat:"Amenities",sub:"Infrastructure",desc:"Office LAN connectivity issues in IT Block. VPN unusable for 3 days.",priority:"High",status:"Closed",tat:2,remark:"Network team resolved switch configuration error. LAN restored."},
+  {id:"GRV-011",date:"15-May-2025",dept:"Finance & Business Accounting",hrbp:"Meena Joshi",cat:"Employment Issues",sub:"Study Leave",desc:"Study leave application for CA exam denied without written reason",priority:"Medium",status:"Open",tat:3,remark:"Reviewing policy applicability. Manager consulted."},
+  {id:"GRV-012",date:"15-May-2025",dept:"Asset & Energy Management",hrbp:"Priya Sharma",cat:"Safety & Well-Being",sub:"Shop Floor Safety",desc:"No PPE available at entry point of Substation Zone-4",priority:"High",status:"Work in Progress",tat:3,remark:"Safety officer deputed. PPE procurement initiated urgently."},
+  {id:"GRV-013",date:"16-May-2025",dept:"Iron Making Operations",hrbp:"Rajesh Kumar",cat:"Safety & Well-Being",sub:"Psychological Safety",desc:"Employee reports verbal harassment from supervisor. Requests counselling.",priority:"High",status:"Open",tat:2,remark:"Referred to EAP. Confidentiality ensured."},
+  {id:"GRV-014",date:"17-May-2025",dept:"Steel Making Operations",hrbp:"Anita Nair",cat:"Amenities",sub:"Seating",desc:"No rest area or seating provided for contract workers on night shift",priority:"Low",status:"Open",tat:1,remark:"Facilities team informed. Seating arrangement being assessed."},
+  {id:"GRV-015",date:"18-May-2025",dept:"Supply Chain & Logistics",hrbp:"Arjun Das",cat:"Employment Issues",sub:"Manager Issues",desc:"Manager assigning duties beyond contractual scope without compensation",priority:"High",status:"Open",tat:0,remark:"Under review by HR. Manager meeting scheduled."},
+];
+
+const deptData = [
+  {name:"Iron Making Operations",hrbp:"Priya Sharma",accent:"#C8922A",accentBg:"rgba(200,146,42,0.12)"},
+  {name:"Steel Making Operations",hrbp:"Rajesh Kumar",accent:"#1565C0",accentBg:"rgba(21,101,192,0.12)"},
+  {name:"Asset & Energy Management",hrbp:"Anita Nair",accent:"#2E7D32",accentBg:"rgba(46,125,50,0.12)"},
+  {name:"Corporate Services",hrbp:"Suresh Patel",accent:"#6A1B9A",accentBg:"rgba(106,27,154,0.12)"},
+  {name:"Supply Chain & Logistics",hrbp:"Meena Joshi",accent:"#006064",accentBg:"rgba(0,96,100,0.12)"},
+  {name:"Engineering Projects",hrbp:"Arjun Das",accent:"#BF360C",accentBg:"rgba(191,54,12,0.12)"},
+  {name:"Finance & Business Accounting",hrbp:"Meena Joshi",accent:"#4527A0",accentBg:"rgba(69,39,160,0.12)"},
+  {name:"HRM",hrbp:"Suresh Patel",accent:"#00695C",accentBg:"rgba(0,105,92,0.12)"},
+  {name:"IT",hrbp:"Anita Nair",accent:"#1565C0",accentBg:"rgba(21,101,192,0.12)"},
+];
+
+const hrbpData = [
+  {name:"Priya Sharma",initials:"PS",divs:"Iron Making Ops · Asset & Energy",accent:"#C8922A",accentBg:"rgba(200,146,42,0.15)"},
+  {name:"Rajesh Kumar",initials:"RK",divs:"Steel Making Operations",accent:"#1565C0",accentBg:"rgba(21,101,192,0.15)"},
+  {name:"Anita Nair",initials:"AN",divs:"Asset & Energy Management · IT",accent:"#2E7D32",accentBg:"rgba(46,125,50,0.15)"},
+  {name:"Suresh Patel",initials:"SP",divs:"Corporate Services · HRM",accent:"#6A1B9A",accentBg:"rgba(106,27,154,0.15)"},
+  {name:"Meena Joshi",initials:"MJ",divs:"Supply Chain & Logistics · Finance",accent:"#006064",accentBg:"rgba(0,96,100,0.15)"},
+  {name:"Arjun Das",initials:"AD",divs:"Engineering Projects",accent:"#BF360C",accentBg:"rgba(191,54,12,0.15)"},
+];
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const sectionTitles = {
+  'overview': 'Executive Overview',
+  'live-status': 'Live Status Monitor',
+  'grievance-register': 'Grievance Data Register',
+  'dept-tracker': 'Department Tracker',
+  'hrbp-dashboard': 'HRBP Performance Dashboard',
+  'category-analysis': 'Category Analysis',
+  'kpi-dashboard': 'KPI & HR Analytics',
+  'satisfaction': 'Satisfaction Scores',
+  'samvad-portal': 'SAMVAD Portal Links',
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('section-' + id);
+  if(el) el.classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(n => { if(n.getAttribute('onclick') && n.getAttribute('onclick').includes(id)) n.classList.add('active'); });
+  document.getElementById('topbar-title').textContent = sectionTitles[id] || id;
+  // Lazy-render on first visit
+  if(id === 'live-status') renderTimeline();
+  if(id === 'grievance-register') renderGrievanceTable();
+  if(id === 'dept-tracker') renderDeptCards();
+  if(id === 'hrbp-dashboard') renderHRBPCards();
+}
+
+// ── GRIEVANCE TABLE ───────────────────────────────────────────────────────────
+function renderGrievanceTable() {
+  const deptFilter = document.getElementById('filter-dept').value;
+  const catFilter  = document.getElementById('filter-cat').value;
+  const statFilter = document.getElementById('filter-status').value;
+  const filtered = grievances.filter(g =>
+    (!deptFilter || g.dept === deptFilter) &&
+    (!catFilter  || g.cat  === catFilter) &&
+    (!statFilter || g.status === statFilter)
+  );
+  const tbody = document.getElementById('grievance-tbody');
+  tbody.innerHTML = filtered.map(g => {
+    const statusCls = g.status === 'Closed' ? 'badge-closed' : g.status === 'Open' ? 'badge-open' : 'badge-wip';
+    const prioCls = g.priority === 'High' ? 'badge-high' : g.priority === 'Medium' ? 'badge-medium' : 'badge-low';
+    const catCls = g.cat === 'Amenities' ? 'badge-amenity' : g.cat === 'Employment Issues' ? 'badge-employ' : 'badge-safety';
+    return `<tr>
+      <td class="td-mono">${g.id}</td>
+      <td>${g.date}</td>
+      <td>${g.dept}</td>
+      <td>${g.hrbp}</td>
+      <td><span class="badge ${catCls}">${g.cat}</span></td>
+      <td>${g.sub}</td>
+      <td><span class="badge ${prioCls}">${g.priority}</span></td>
+      <td><span class="badge ${statusCls}">${g.status}</span></td>
+      <td style="text-align:center">${g.tat}</td>
+      <td style="font-size:11px;color:rgba(255,255,255,0.6);font-style:italic">${g.remark}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TIMELINE ──────────────────────────────────────────────────────────────────
+let currentFilter = 'All';
+function filterStatus(s) { currentFilter = s; renderTimeline(); }
+
+function renderTimeline() {
+  const filtered = grievances.filter(g => currentFilter === 'All' || g.status === currentFilter);
+  const dotColors = {Open:'rgba(198,40,40,0.2)',  'Work in Progress':'rgba(230,81,0,0.2)', Closed:'rgba(46,125,50,0.2)'};
+  const dotFg     = {Open:'#EF5350', 'Work in Progress':'#FF8F00', Closed:'#66BB6A'};
+  const emojis    = {Open:'🔴','Work in Progress':'🟡',Closed:'🟢'};
+  document.getElementById('timeline-container').innerHTML = filtered.map(g => `
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:${dotColors[g.status]}">
+        <span>${emojis[g.status]}</span>
+      </div>
+      <div class="timeline-content">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="timeline-title">${g.id} — ${g.sub}</span>
+          <span class="badge ${g.status==='Closed'?'badge-closed':g.status==='Open'?'badge-open':'badge-wip'}">${g.status}</span>
+          <span class="badge ${g.priority==='High'?'badge-high':g.priority==='Medium'?'badge-medium':'badge-low'}">${g.priority}</span>
+        </div>
+        <div class="timeline-meta">${g.date} · ${g.dept} · HRBP: ${g.hrbp} · TAT: ${g.tat} day(s)</div>
+        <div class="timeline-remark">"${g.remark}"</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── DEPT CARDS ────────────────────────────────────────────────────────────────
+function renderDeptCards() {
+  const container = document.getElementById('dept-cards');
+  if(container.children.length > 0) return;
+  container.innerHTML = deptData.map(d => {
+    const related = grievances.filter(g => g.dept === d.name);
+    const open   = related.filter(g => g.status === 'Open').length;
+    const wip    = related.filter(g => g.status === 'Work in Progress').length;
+    const closed = related.filter(g => g.status === 'Closed').length;
+    const total  = related.length;
+    const highOpen = related.filter(g => g.status === 'Open' && g.priority === 'High').length;
+    const resolRate = total ? Math.round(closed/total*100) : 0;
+    const rating = closed/Math.max(total,1) >= 0.6 ? '🟢 Good' : wip/Math.max(total,1) > 0.5 ? '🟡 Monitor' : total === 0 ? '⚪ No Cases' : '🔴 Attention';
+    return `<div class="dept-card" style="--accent:${d.accent}">
+      <div class="dept-name">${d.name}</div>
+      <div class="dept-hrbp">👤 HRBP: ${d.hrbp}</div>
+      <div class="dept-stats">
+        <div class="dept-stat"><div class="dept-stat-val" style="color:${d.accent}">${total}</div><div class="dept-stat-lbl">Total</div></div>
+        <div class="dept-stat"><div class="dept-stat-val" style="color:#EF5350">${open}</div><div class="dept-stat-lbl">Open</div></div>
+        <div class="dept-stat"><div class="dept-stat-val" style="color:#FF8F00">${wip}</div><div class="dept-stat-lbl">WIP</div></div>
+        <div class="dept-stat"><div class="dept-stat-val" style="color:#66BB6A">${closed}</div><div class="dept-stat-lbl">Closed</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${resolRate}%;background:${d.accent}"></div></div>
+      <div style="font-size:10px;color:var(--gray-400);margin-top:4px;margin-bottom:8px">${resolRate}% resolved · ${highOpen} high-priority open</div>
+      <div class="dept-rating">
+        <span style="font-size:11px;color:var(--gray-400)">Status Rating</span>
+        <span class="dept-rating-text" style="color:${d.accent}">${rating}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── HRBP CARDS ────────────────────────────────────────────────────────────────
+function renderHRBPCards() {
+  const container = document.getElementById('hrbp-cards');
+  if(container.children.length > 0) return;
+  container.innerHTML = hrbpData.map(h => {
+    const related = grievances.filter(g => g.hrbp === h.name);
+    const open   = related.filter(g => g.status === 'Open').length;
+    const wip    = related.filter(g => g.status === 'Work in Progress').length;
+    const closed = related.filter(g => g.status === 'Closed').length;
+    const total  = related.length;
+    const highOpen = related.filter(g => g.status === 'Open' && g.priority === 'High').length;
+    const avgTat = closed ? (related.filter(g=>g.status==='Closed').reduce((a,b)=>a+b.tat,0)/closed).toFixed(1) : '—';
+    const resolRate = total ? Math.round(closed/total*100) : 0;
+    const rating = closed/Math.max(total,1) >= 0.6 ? (resolRate>=80?'🌟 Excellent':'✅ Good') : open+wip > closed ? '⚠️ Review' : '🔄 Active';
+    const ratingColor = rating.includes('Excellent') ? '#66BB6A' : rating.includes('Good') ? '#64B5F6' : rating.includes('Review') ? '#EF5350' : '#FF8F00';
+    return `<div class="hrbp-card">
+      <div class="hrbp-card-header" style="background:${h.accentBg}">
+        <div class="hrbp-avatar" style="background:${h.accent}">${h.initials}</div>
+        <div>
+          <div class="hrbp-name">${h.name}</div>
+          <div class="hrbp-divs">${h.divs}</div>
+        </div>
+        <div class="hrbp-rating-badge" style="background:${ratingColor}22;color:${ratingColor};border:1px solid ${ratingColor}44">${rating}</div>
+      </div>
+      <div class="hrbp-card-body">
+        <div class="hrbp-metrics">
+          <div class="hrbp-metric"><div class="hrbp-metric-val" style="color:${h.accent}">${total}</div><div class="hrbp-metric-lbl">Total Cases</div></div>
+          <div class="hrbp-metric"><div class="hrbp-metric-val" style="color:#66BB6A">${closed}</div><div class="hrbp-metric-lbl">Closed</div></div>
+          <div class="hrbp-metric"><div class="hrbp-metric-val" style="color:#EF5350">${open}</div><div class="hrbp-metric-lbl">Open</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#FF8F00;font-family:'Space Grotesk',sans-serif">${wip}</div>
+            <div style="font-size:9px;color:var(--gray-400);text-transform:uppercase">WIP Cases</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#EF9A9A;font-family:'Space Grotesk',sans-serif">${highOpen}</div>
+            <div style="font-size:9px;color:var(--gray-400);text-transform:uppercase">High Priority Open</div>
+          </div>
+        </div>
+        <div class="hrbp-tat-bar">
+          <div class="hrbp-tat-label">
+            <span>Avg TAT (Closed Cases)</span>
+            <span style="color:${h.accent}">${avgTat} days</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${resolRate}%;background:${h.accent}"></div>
+          </div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:4px">${resolRate}% resolution rate</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+// Update open count badge
+const openCount = grievances.filter(g => g.status === 'Open').length;
+document.getElementById('open-count-nav').textContent = openCount;
+</script>
+</body>
+</html>
